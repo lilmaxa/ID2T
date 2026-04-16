@@ -230,6 +230,7 @@ def enqueue_functions(param_dict, rewrap):
     , 'dns_change_ips'
     # HTTP
     , 'httpv1_regex_ip_swap'
+    , 'httpv1_timestamp_change'
     ]
 
     for f in functions:

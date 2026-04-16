@@ -27,9 +27,9 @@ if [ ! ${NONINTERACTIVE} = true ]; then
 fi
 
 # update submodules
-git submodule update --init --remote -- submodules/Trace-Manipulation
-## Moving TMLib
-# mv submodules/Trace-Manipulation/TMLib code/TMLib
+# git submodule update --init --remote -- submodules/Trace-Manipulation
+# ## Moving TMLib
+# # mv submodules/Trace-Manipulation/TMLib code/TMLib
 
 LIBTINS_VERSION=$(./resources/libtins_version.sh)
 
@@ -48,6 +48,9 @@ source .venv/bin/activate
 
 # Upgrade pip if necessary
 pip3 install --upgrade pip
+
+# Install wheel to allow building wheels for dependencies
+pip3 install wheel
 
 # Install python packages
 pip3 install -r resources/requirements.txt
@@ -236,7 +239,7 @@ chmod +x ./id2t
 chmod +x ./run_tests
 chmod +x ./test_efficiency
 
-chmod +x ./run_tests_makeshift
+# chmod +x ./run_tests_makeshift
 
 echo -e "\n\nAll is set. ID2T is ready."
 echo -e "\nRun efficiency tests with the command './test_efficiency'"

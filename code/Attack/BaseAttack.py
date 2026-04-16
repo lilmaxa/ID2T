@@ -376,7 +376,7 @@ class BaseAttack(metaclass=abc.ABCMeta):
             print('Parameter ' + str(param_name) + ' not available for chosen attack. Skipping parameter.')
 
         # If value is query -> get value from database
-        elif param_name != atkParam.Parameter.INTERVAL_SELECT_STRATEGY and self.statistics.is_query(value):
+        elif param_name != atkParam.Parameter.INTERVAL_SELECT_STRATEGY and self.statistics is not None and self.statistics.is_query(value):
             value = self.statistics.process_db_query(value, False)
             if value is not None and value is not "":
                 is_valid = True
