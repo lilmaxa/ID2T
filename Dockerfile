@@ -34,6 +34,9 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
 # Run the build script
 RUN chmod +x build.sh && ./build.sh --non-interactive
 
+RUN cp /app/code_boost/src/build/libtins/lib/libtins.so* /usr/local/lib/ && \
+    rm -rf /app/code_boost /app/.git
+
 
 # Stage 2: Runtime
 FROM ubuntu:18.04
@@ -42,13 +45,15 @@ FROM ubuntu:18.04
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.6 \
     python3-pip \
-    python3-venv \
+    libpython3.6 \
     libpcap0.8 \
     libcairo2 \
+    libssl1.1 \
     sqlite3 \
     tcpdump \
-    libboost-all-dev \
     && rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
 
 WORKDIR /app
 
