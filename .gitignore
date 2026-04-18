@@ -48,3 +48,6 @@ test_efficiency
 
 # editor
 .vscode
+
+# logs
+.log
