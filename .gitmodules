@@ -4,6 +4,9 @@
 [submodule "code_boost/src/pybind11"]
 	path = code_boost/src/pybind11
 	url = https://github.com/pybind/pybind11
-[submodule "code_boost/src/libtins"]
-	path = code_boost/src/libtins
-	url = https://github.com/mfontanini/libtins
+# [submodule "code_boost/src/libtins"]
+# 	path = code_boost/src/libtins
+# 	url = https://github.com/mfontanini/libtins
+# [submodule "submodules/Trace-Manipulation"]
+# 	path = submodules/Trace-Manipulation
+# 	url = https://github.com/Trace-Share/Trace-Manipulation
