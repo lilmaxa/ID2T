@@ -982,23 +982,29 @@ def httpv1_regex_ip_swap(packet, data):
     :param packet: scapy_extend.http HTTPv1 packet
     :param data: dict containing TMLib.TMdict dictionaries
     """
-    s = packet.getfieldval('HTTP-payload').decode('utf-8')
+    raw = packet.getfieldval('HTTP-payload')
+
+    try:
+        s = raw.decode('utf-8')
+    except (UnicodeDecodeError, AttributeError):
+        return
+
     ips = data[TMdef.GLOBAL][TMdef.TARGET]['ip_address_map']
 
-    # Split into headers and body; HTTP spec mandates \r\n\r\n as separator.
+    # Split into headers and body
     header_sep = '\r\n\r\n'
     if header_sep in s:
         headers, body = s.split(header_sep, 1)
 
-        # Replace IPs in body and measure length change.
+        # Replace IPs in body and measure length change
         new_body = ipv4_regex.sub(lambda m: ips.get(m.group(), m.group()), body)
         new_body = ipv6_regex.sub(lambda m: ips.get(m.group(), m.group()), new_body)
 
-        # Replace IPs in headers (e.g. Host:, Location:).
+        # Replace IPs in headers
         new_headers = ipv4_regex.sub(lambda m: ips.get(m.group(), m.group()), headers)
         new_headers = ipv6_regex.sub(lambda m: ips.get(m.group(), m.group()), new_headers)
 
-        # Update Content-Length if the body byte length changed.
+        # Update Content-Length if the body byte length changed
         old_body_len = len(body.encode('utf-8'))
         new_body_len = len(new_body.encode('utf-8'))
         if old_body_len != new_body_len:
@@ -1010,7 +1016,7 @@ def httpv1_regex_ip_swap(packet, data):
 
         s = new_headers + header_sep + new_body
     else:
-        # No header/body separator — replace IPs across the whole payload.
+        # If there is no header/body separator, then replace IPs across the whole payload
         s = ipv4_regex.sub(lambda m: ips.get(m.group(), m.group()), s)
         s = ipv6_regex.sub(lambda m: ips.get(m.group(), m.group()), s)
 
@@ -1023,33 +1029,36 @@ def httpv1_rewrite_date(packet, data):
     original date/time value by the configured timestamp_shift.
 
     The "Date" header is only present in HTTP responses (messages whose
-    first line begins with "HTTP/").  If no Date header is found, or if the
+    first line begins with "HTTP/"). If no Date header is found, or if the
     timestamp_shift is zero, the payload is left unchanged.
 
-    The header value must conform to the IMF-fixdate format defined in
-    RFC 7231, e.g.: Date: Thu, 01 Jan 2015 00:00:00 GMT
+    The header value must conform to the format 'Date: Thu, 01 Jan 2015 00:00:00 GMT'.
 
     :param packet: scapy_extend.http HTTPv1 packet
     :param data: dict containing TMLib.TMdict dictionaries
     """
+
     shift = data[TMdef.GLOBAL][TMdef.ATTACK].get('timestamp_shift', 0)
     if not shift:
         return
+    
 
     raw = packet.getfieldval('HTTP-payload')
+    if not raw:
+        return
+    
+    parts = raw.split(b'\r\n\r\n', 1)
+
     try:
-        s = raw.decode('utf-8')
+        headers = parts[0].decode('utf-8')
     except (UnicodeDecodeError, AttributeError):
         return
 
-    # Only rewrite Date headers in responses (first line starts with "HTTP/").
-    header_sep = '\r\n\r\n'
-    headers_raw = s.split(header_sep, 1)[0]
-    first_line = headers_raw.split('\r\n', 1)[0]
-    if not first_line.upper().startswith('HTTP/'):
-        return
 
-    # RFC 7231 / RFC 1123 date format used in HTTP headers.
+    if 'date:' not in headers.lower():                                                                                                                                                                        
+      return
+    
+    # Date format used in HTTP headers
     _HTTP_DATE_FMT = '%a, %d %b %Y %H:%M:%S GMT'
 
     date_re = re.compile(
@@ -1064,13 +1073,18 @@ def httpv1_rewrite_date(packet, data):
             dt = datetime.datetime.strptime(m.group(2), _HTTP_DATE_FMT)
             dt += datetime.timedelta(seconds=shift)
             return m.group(1) + dt.strftime(_HTTP_DATE_FMT)
-        except ValueError:
+        except (ValueError, OverflowError):
             return m.group(0)  # Leave unchanged if parsing fails.
 
-    new_s = date_re.sub(_shift_date, s)
-    if new_s != s:
-        packet.setfieldval('HTTP-payload', new_s.encode('utf-8'))
-
+    new_headers = date_re.sub(_shift_date, headers)
+    if new_headers == headers:
+        return
+    
+    if len(parts) > 1:
+        packet.fields['HTTP-payload'] = new_headers.encode('utf-8') + b'\r\n\r\n' + parts[1]
+    else:
+        packet.fields['HTTP-payload'] = new_headers.encode('utf-8')
+    
 
 ###############################################
 ################## Helpers

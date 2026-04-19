@@ -18,12 +18,11 @@ class HTTP(Packet):
         Guess the version of HTTP protocol
         """
         try:
-            # naive guess, HTTPv1 if payload can be parsed as utf-8
-            payload.decode("utf-8")
+            #Only check if headers can be decoded as utf-8, since some HTTPv1 packets may contain binary data in the body
+            payload.split(b'\r\n\r\n', 1)[0].decode('utf-8')
             return HTTPv1
         except:
             return None
-        return None
 
 
 #Bind to port 80
