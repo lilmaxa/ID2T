@@ -3,33 +3,39 @@
 
 The files changed in this forked Trace-Share ID2T repository are shown below:
 
-ID2T/
-├── .gitignore
-├── .gitmodules          # submodule entries commented out
-├── build.sh             # submodule update commented out, install wheel added
-├── Dockerfile           # new file: containerised build environment
-├── resources/
-│   └── requirements.txt     # cairocffi bumped
-├── code/
-│   ├── Attack/
-│   │   └── Mix.py           # httpv1_timestamp_change added to applied transformations
-│   └── scapy_extend/
-│       └── http.py          # HTTP detection now decodes headers only to avoid crashes on binary bodies
-└── submodules/
-    └── Trace-Manipulation/
-        ├── requirements.txt     # numpy, pyyaml bumped
-        ├── scapy_extend/
-        │   └── http.py          # identical header-only detection fix as in code/scapy_extend/http.py
-        └── TMLib/
-            ├── TMdict.py        # port map key bug fixed
-            ├── subscribers/     # httpv1_timestamp_change transformations registered
-            │   ├── default_fs.py
-            │   └── normalizers.py
-            ├── transf/
-            │   └── PacketProcessing.py  # packet length recalculation added; httpv1_regex_ip_swap
-            │                            # rewritten to update Content-Length; httpv1_rewrite_date added
-            └── utils/
-                └── tmdict_fillers.py    # port mapping fix: IP variable typo fixed; type check corrected
+        ├── .gitmodules — submodule entries commented out
+
+        ├── build.sh — submodule update commented out, install wheel added
+
+        ├── Dockerfile — new file: containerised build environment
+
+        ├── resources/
+
+        │    └── requirements.txt — cairocffi bumped
+
+        ├── code/
+
+        │    ├── Attack/Mix.py — httpv1_timestamp_change added to applied transformations
+
+        │    └── scapy_extend/http.py — HTTP detection now decodes headers only
+
+        └── submodules/Trace-Manipulation/
+
+              ├── requirements.txt — numpy, pyyaml bumped
+
+              ├── scapy_extend/http.py — identical header-only detection fix
+
+              └── TMLib/
+
+                    ├── TMdict.py — port map key bug fixed
+
+                    ├── subscribers/default_fs.py — httpv1_timestamp_change registered
+
+                    ├── subscribers/normalizers.py — httpv1_timestamp_change registered
+
+                    ├── transf/PacketProcessing.py — length recalculation, Content-Length fix, httpv1_rewrite_date added
+
+                    └── utils/tmdict_fillers.py — IP variable typo and port type check fixed
 
 
 Fork of the official **[ID2T repository](https://github.com/tklab-tud/ID2T)** extended by functions to modify and combine existing packet traces.
