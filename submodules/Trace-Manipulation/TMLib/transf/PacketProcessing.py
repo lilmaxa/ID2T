@@ -1028,9 +1028,8 @@ def httpv1_rewrite_date(packet, data):
     Rewrites the "Date" header in an HTTP response payload by shifting the
     original date/time value by the configured timestamp_shift.
 
-    The "Date" header is only present in HTTP responses (messages whose
-    first line begins with "HTTP/"). If no Date header is found, or if the
-    timestamp_shift is zero, the payload is left unchanged.
+    If no Date header is found, or if the timestamp_shift is zero, 
+    the payload is left unchanged.
 
     The header value must conform to the format 'Date: Thu, 01 Jan 2015 00:00:00 GMT'.
 
@@ -1081,9 +1080,9 @@ def httpv1_rewrite_date(packet, data):
         return
     
     if len(parts) > 1:
-        packet.fields['HTTP-payload'] = new_headers.encode('utf-8') + b'\r\n\r\n' + parts[1]
+        packet.setfieldval('HTTP-payload', new_headers.encode('utf-8') + b'\r\n\r\n' + parts[1])
     else:
-        packet.fields['HTTP-payload'] = new_headers.encode('utf-8')
+        packet.setfieldval('HTTP-payload', new_headers.encode('utf-8'))
     
 
 ###############################################
