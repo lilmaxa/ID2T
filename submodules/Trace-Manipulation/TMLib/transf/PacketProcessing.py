@@ -983,7 +983,10 @@ def httpv1_regex_ip_swap(packet, data):
     :param data: dict containing TMLib.TMdict dictionaries
     """
     raw = packet.getfieldval('HTTP-payload')
-
+    if not raw:
+        return
+    
+    #Only edit packets with payloads that can be decoded as UTF-8 as a whole
     try:
         s = raw.decode('utf-8')
     except (UnicodeDecodeError, AttributeError):
@@ -1046,8 +1049,10 @@ def httpv1_rewrite_date(packet, data):
     if not raw:
         return
     
+    # Split into headers and body
     parts = raw.split(b'\r\n\r\n', 1)
 
+    # Edit packets with headers that can be decoded as UTF-8, since we do not care about the body
     try:
         headers = parts[0].decode('utf-8')
     except (UnicodeDecodeError, AttributeError):
@@ -1067,6 +1072,7 @@ def httpv1_rewrite_date(packet, data):
         r' \d{4} \d{2}:\d{2}:\d{2} GMT)'
     )
 
+    # Time shifting function for regex substitution
     def _shift_date(m):
         try:
             dt = datetime.datetime.strptime(m.group(2), _HTTP_DATE_FMT)
@@ -1079,6 +1085,7 @@ def httpv1_rewrite_date(packet, data):
     if new_headers == headers:
         return
     
+    # Update the payload with the modified headers and original body (if any), adding the header/body separator back if it was originally present
     if len(parts) > 1:
         packet.setfieldval('HTTP-payload', new_headers.encode('utf-8') + b'\r\n\r\n' + parts[1])
     else:
